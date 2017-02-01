@@ -28,7 +28,7 @@ var run creator = &shell{}
 
 // AsMock will run all commands as a mock object
 func SetMock(mock *MockShellCmd) {
-	run = &mockShell{}
+	run = &mockShell{cmd: mock}
 }
 
 // AsExec will run all commends as os/exec

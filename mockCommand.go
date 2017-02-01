@@ -5,7 +5,7 @@ import (
 	"reflect"
 )
 
-var mockType = reflect.TypeOf(mockShell{})
+var mockType = reflect.TypeOf(MockShellCmd{})
 
 type mockShell struct {
 	cmd *MockShellCmd
@@ -15,6 +15,9 @@ func (c *mockShell) Command(name string, arg ...string) Cmder {
 	cmd := reflect.New(mockType).Interface().(*MockShellCmd)
 	cmd.Name = name
 	cmd.Args = arg
+	if c.cmd == nil {
+		return cmd
+	}
 	cmd.RunErr = c.cmd.RunErr
 	cmd.StartErr = c.cmd.StartErr
 	cmd.CombinedOutputVal = c.cmd.CombinedOutputVal
