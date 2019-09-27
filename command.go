@@ -125,3 +125,6 @@ func (c *osCmd) GetProcess() *os.Process {
 func (c *osCmd) GetProcessState() *os.ProcessState {
 	return c.cmd.ProcessState
 }
+func (c *osCmd) GetMethodsCalled() []MethodCall {
+	return nil
+}

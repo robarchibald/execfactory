@@ -45,19 +45,26 @@ type MockInstance struct {
 
 type mockCmd struct {
 	Cmder
-	mock         MockInstance
-	name         string
-	path         string
-	args         []string
-	env          []string
-	dir          string
-	stdin        io.Reader
-	stdout       io.Writer
-	stderr       io.Writer
-	extraFiles   []*os.File
-	sysProcAttr  *syscall.SysProcAttr
-	process      *os.Process
-	processState *os.ProcessState
+	mock          MockInstance
+	name          string
+	path          string
+	args          []string
+	env           []string
+	dir           string
+	stdin         io.Reader
+	stdout        io.Writer
+	stderr        io.Writer
+	extraFiles    []*os.File
+	sysProcAttr   *syscall.SysProcAttr
+	process       *os.Process
+	processState  *os.ProcessState
+	methodsCalled []MethodCall
+}
+
+// MethodCall is used to keep track of all the methods called by the mock Cmd
+type MethodCall struct {
+	Name string
+	Args []interface{}
 }
 
 func (c *mockCmd) String() string {
@@ -158,4 +165,7 @@ func (c *mockCmd) GetProcess() *os.Process {
 }
 func (c *mockCmd) GetProcessState() *os.ProcessState {
 	return c.processState
+}
+func (c *mockCmd) GetMethodsCalled() []MethodCall {
+	return c.methodsCalled
 }
