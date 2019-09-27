@@ -9,7 +9,14 @@ import (
 	"syscall"
 )
 
-type creator interface {
+// OS is an instance of an OS creator
+var OS Creator = &osCreator{}
+
+// Mock is an instance of a Mock Creator
+var Mock Creator = &mockCreator{}
+
+// Creator is the interface used to create either a mock or real os/exec Cmd
+type Creator interface {
 	Command(name string, arg ...string) Cmder
 	CommandContext(ctx context.Context, name string, arg ...string) Cmder
 }

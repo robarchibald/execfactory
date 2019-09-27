@@ -1,14 +1,20 @@
 package exec
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"os"
 	"syscall"
 )
 
-// MockCommand generates a testable Cmder interface
-func MockCommand(name string, arg ...string) Cmder {
+type mockCreator struct{}
+
+func (c *mockCreator) Command(name string, arg ...string) Cmder {
+	return &mockCmd{name: name, args: arg}
+}
+
+func (c *mockCreator) CommandContext(ctx context.Context, name string, arg ...string) Cmder {
 	return &mockCmd{name: name, args: arg}
 }
 

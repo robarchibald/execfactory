@@ -9,13 +9,13 @@ import (
 	"syscall"
 )
 
-// Command generates a testable Cmder interface which will run using the built-in os/exec *Cmd struct
-func Command(name string, arg ...string) Cmder {
+type osCreator struct{}
+
+func (c *osCreator) Command(name string, arg ...string) Cmder {
 	return &osCmd{cmd: osexec.Command(name, arg...)}
 }
 
-// CommandContext generates a testable Cmder interface which will run using the built-in os/exec *Cmd struct
-func CommandContext(ctx context.Context, name string, arg ...string) Cmder {
+func (c *osCreator) CommandContext(ctx context.Context, name string, arg ...string) Cmder {
 	return &osCmd{cmd: osexec.CommandContext(ctx, name, arg...)}
 }
 
