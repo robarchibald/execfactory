@@ -1,112 +1,144 @@
-package command
+package exec
 
 import (
+	"fmt"
 	"io"
-	"reflect"
+	"os"
+	"syscall"
 )
 
-var mockType = reflect.TypeOf(MockShellCmd{})
-
-type mockShell struct {
-	cmd *MockShellCmd
+// MockCommand generates a testable Cmder interface
+func MockCommand(name string, arg ...string) Cmder {
+	return &mockCmd{name: name, args: arg}
 }
 
-func (c *mockShell) Command(name string, arg ...string) Cmder {
-	cmd := reflect.New(mockType).Interface().(*MockShellCmd)
-	cmd.Name = name
-	cmd.Args = arg
-	if c.cmd == nil {
-		return cmd
-	}
-	cmd.RunErr = c.cmd.RunErr
-	cmd.StartErr = c.cmd.StartErr
-	cmd.CombinedOutputVal = c.cmd.CombinedOutputVal
-	cmd.CombinedOutputErr = c.cmd.CombinedOutputErr
-	cmd.OutputVal = c.cmd.OutputVal
-	cmd.OutputErr = c.cmd.OutputErr
-	cmd.workingDir = c.cmd.workingDir
-	cmd.Stdin = c.cmd.Stdin
-	cmd.Stdout = c.cmd.Stdout
-	cmd.StderrPipeVal = c.cmd.StderrPipeVal
-	cmd.StderrPipeErr = c.cmd.StderrPipeErr
-	cmd.StdoutPipeVal = c.cmd.StdoutPipeVal
-	cmd.StdoutPipeErr = c.cmd.StdoutPipeErr
-	cmd.WaitErr = c.cmd.WaitErr
-	return cmd
-}
-
-// MockShellCmd contains all the properties and methods to test a shell command
-type MockShellCmd struct {
+type mockCmd struct {
 	Cmder
-	Name              string
-	Args              []string
 	RunErr            error
 	StartErr          error
 	CombinedOutputVal []byte
 	CombinedOutputErr error
 	OutputVal         []byte
 	OutputErr         error
-	workingDir        string
-	Stdin             io.ReadCloser
-	Stdout            io.Writer
+	workingdir        string
+	stdinPipeVal      io.WriteCloser
+	stdinPipeErr      error
 	StderrPipeVal     io.ReadCloser
 	StderrPipeErr     error
 	StdoutPipeVal     io.ReadCloser
 	StdoutPipeErr     error
 	WaitErr           error
+
+	name         string
+	path         string
+	args         []string
+	env          []string
+	dir          string
+	stdin        io.Reader
+	stdout       io.Writer
+	stderr       io.Writer
+	extraFiles   []*os.File
+	sysProcAttr  *syscall.SysProcAttr
+	process      *os.Process
+	processState *os.ProcessState
 }
 
-// Run method
-func (r *MockShellCmd) Run() error {
-	return r.RunErr
+func (c *mockCmd) String() string {
+	return fmt.Sprintf("%s, %v", c.name, c.args)
+}
+func (c *mockCmd) Run() error {
+	return c.RunErr
+}
+func (c *mockCmd) Start() error {
+	return c.StartErr
+}
+func (c *mockCmd) CombinedOutput() ([]byte, error) {
+	return c.CombinedOutputVal, c.CombinedOutputErr
+}
+func (c *mockCmd) Output() ([]byte, error) {
+	return c.OutputVal, c.OutputErr
+}
+func (c *mockCmd) stdinPipe() (io.WriteCloser, error) {
+	return c.stdinPipeVal, c.stdinPipeErr
+}
+func (c *mockCmd) StderrPipe() (io.ReadCloser, error) {
+	return c.StderrPipeVal, c.StderrPipeErr
+}
+func (c *mockCmd) StdoutPipe() (io.ReadCloser, error) {
+	return c.StdoutPipeVal, c.StdoutPipeErr
+}
+func (c *mockCmd) Wait() error {
+	return c.WaitErr
 }
 
-// Start method
-func (r *MockShellCmd) Start() error {
-	return r.StartErr
+// Sets
+
+func (c *mockCmd) Setpath(path string) {
+	c.path = path
+}
+func (c *mockCmd) Setargs(args []string) {
+	c.args = args
+}
+func (c *mockCmd) Setenv(env []string) {
+	c.env = env
+}
+func (c *mockCmd) Setdir(path string) {
+	c.dir = path
+}
+func (c *mockCmd) Setstdin(stdin io.Reader) {
+	c.stdin = stdin
+}
+func (c *mockCmd) SetStdout(stdout io.Writer) {
+	c.stdout = stdout
+}
+func (c *mockCmd) SetStderr(stderr io.Writer) {
+	c.stderr = stderr
+}
+func (c *mockCmd) SetExtraFiles(files []*os.File) {
+	c.extraFiles = files
+}
+func (c *mockCmd) SetSysProcAttr(attr *syscall.SysProcAttr) {
+	c.sysProcAttr = attr
+}
+func (c *mockCmd) SetProcess(process *os.Process) {
+	c.process = process
+}
+func (c *mockCmd) SetProcessState(processState *os.ProcessState) {
+	c.processState = processState
 }
 
-// CombinedOutput method
-func (r *MockShellCmd) CombinedOutput() ([]byte, error) {
-	return r.CombinedOutputVal, r.CombinedOutputErr
-}
+// Gets
 
-// Output method
-func (r *MockShellCmd) Output() ([]byte, error) {
-	return r.OutputVal, r.OutputErr
+func (c *mockCmd) Getpath() string {
+	return c.path
 }
-
-// SetWorkingDir method
-func (r *MockShellCmd) SetWorkingDir(path string) {
-	r.workingDir = path
+func (c *mockCmd) Getargs() []string {
+	return c.args
 }
-
-// GetWorkingDir method
-func (r *MockShellCmd) GetWorkingDir() string {
-	return r.workingDir
+func (c *mockCmd) Getenv() []string {
+	return c.env
 }
-
-// SetStdin method
-func (r *MockShellCmd) SetStdin(stdin io.ReadCloser) {
-	r.Stdin = stdin
+func (c *mockCmd) Getdir() string {
+	return c.dir
 }
-
-// SetStdout method
-func (r *MockShellCmd) SetStdout(stdout io.Writer) {
-	r.Stdout = stdout
+func (c *mockCmd) Getstdin() io.Reader {
+	return c.stdin
 }
-
-// StderrPipe method
-func (r *MockShellCmd) StderrPipe() (io.ReadCloser, error) {
-	return r.StderrPipeVal, r.StderrPipeErr
+func (c *mockCmd) GetStdout() io.Writer {
+	return c.stdout
 }
-
-// StdoutPipe method
-func (r *MockShellCmd) StdoutPipe() (io.ReadCloser, error) {
-	return r.StdoutPipeVal, r.StdoutPipeErr
+func (c *mockCmd) GetStderr() io.Writer {
+	return c.stderr
 }
-
-// Wait method
-func (r *MockShellCmd) Wait() error {
-	return r.WaitErr
+func (c *mockCmd) GetExtraFiles() []*os.File {
+	return c.extraFiles
+}
+func (c *mockCmd) GetSysProcAttr() *syscall.SysProcAttr {
+	return c.sysProcAttr
+}
+func (c *mockCmd) GetProcess() *os.Process {
+	return c.process
+}
+func (c *mockCmd) GetProcessState() *os.ProcessState {
+	return c.processState
 }

@@ -1,39 +1,60 @@
-package command
+package exec
 
 import (
 	"bytes"
+	"context"
 	"io"
+	"os"
 	"strings"
+	"syscall"
 )
 
 type creator interface {
 	Command(name string, arg ...string) Cmder
+	CommandContext(ctx context.Context, name string, arg ...string) Cmder
 }
 
 // Cmder interface wraps the os/exec Cmd struct
 type Cmder interface {
 	Run() error
 	Start() error
+	String() string
 	CombinedOutput() ([]byte, error)
 	Output() ([]byte, error)
-	SetWorkingDir(path string)
-	SetStdin(stdin io.ReadCloser)
-	SetStdout(stdout io.Writer)
+	StdinPipe() (io.WriteCloser, error)
 	StderrPipe() (io.ReadCloser, error)
 	StdoutPipe() (io.ReadCloser, error)
 	Wait() error
+	cmdGetter
+	cmdSetter
 }
 
-var run creator = &shell{}
-
-// AsMock will run all commands as a mock object
-func SetMock(mock *MockShellCmd) {
-	run = &mockShell{cmd: mock}
+type cmdSetter interface {
+	SetPath(path string)
+	SetArgs(args []string)
+	SetEnv(env []string)
+	SetDir(path string)
+	SetStdin(stdin io.Reader)
+	SetStdout(stdout io.Writer)
+	SetStderr(stderr io.Writer)
+	SetExtraFiles(files []*os.File)
+	SetSysProcAttr(attr *syscall.SysProcAttr)
+	SetProcess(process *os.Process)
+	SetProcessState(processState *os.ProcessState)
 }
 
-// AsExec will run all commends as os/exec
-func SetExec() {
-	run = &shell{}
+type cmdGetter interface {
+	GetPath() string
+	GetArgs() []string
+	GetEnv() []string
+	GetDir() string
+	GetStdin() io.Reader
+	GetStdout() io.Writer
+	GetStderr() io.Writer
+	GetExtraFiles() []*os.File
+	GetSysProcAttr() *syscall.SysProcAttr
+	GetProcess() *os.Process
+	GetProcessState() *os.ProcessState
 }
 
 // PipeCommands will pipe two commands together and return the output
@@ -53,9 +74,4 @@ func PipeCommands(r1 Cmder, r2 Cmder) string {
 		out = out[9:len(out)]
 	}
 	return out
-}
-
-// Command mirrors the os/exec Command(name string, arg ...string) *Cmd method
-func Command(name string, arg ...string) Cmder {
-	return run.Command(name, arg...)
 }

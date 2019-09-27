@@ -1,57 +1,125 @@
-package command
+package exec
 
 import (
+	"context"
 	"io"
+	"os"
 	"os/exec"
+	osexec "os/exec"
+	"syscall"
 )
 
-type shell struct{}
-
-func (c *shell) Command(name string, arg ...string) Cmder {
-	return &shellCmd{cmd: exec.Command(name, arg...)}
+// Command generates a testable Cmder interface which will run using the built-in os/exec *Cmd struct
+func Command(name string, arg ...string) Cmder {
+	return &osCmd{cmd: osexec.Command(name, arg...)}
 }
 
-type shellCmd struct {
+// CommandContext generates a testable Cmder interface which will run using the built-in os/exec *Cmd struct
+func CommandContext(ctx context.Context, name string, arg ...string) Cmder {
+	return &osCmd{cmd: osexec.CommandContext(ctx, name, arg...)}
+}
+
+type osCmd struct {
 	cmd        *exec.Cmd
 	workingDir string
 }
 
-func (r *shellCmd) Run() error {
-	return r.cmd.Run()
+func (c *osCmd) String() string {
+	return c.cmd.String()
+}
+func (c *osCmd) Run() error {
+	return c.cmd.Run()
+}
+func (c *osCmd) Start() error {
+	return c.cmd.Start()
+}
+func (c *osCmd) CombinedOutput() ([]byte, error) {
+	return c.cmd.CombinedOutput()
+}
+func (c *osCmd) Output() ([]byte, error) {
+	return c.cmd.Output()
+}
+func (c *osCmd) StdinPipe() (io.WriteCloser, error) {
+	return c.cmd.StdinPipe()
+}
+func (c *osCmd) StderrPipe() (io.ReadCloser, error) {
+	return c.cmd.StderrPipe()
+}
+func (c *osCmd) StdoutPipe() (io.ReadCloser, error) {
+	return c.cmd.StdoutPipe()
+}
+func (c *osCmd) Wait() error {
+	return c.cmd.Wait()
 }
 
-func (r *shellCmd) Start() error {
-	return r.cmd.Start()
+// Sets
+
+func (c *osCmd) SetPath(path string) {
+	c.cmd.Path = path
+}
+func (c *osCmd) SetArgs(args []string) {
+	c.cmd.Args = args
+}
+func (c *osCmd) SetEnv(env []string) {
+	c.cmd.Env = env
+}
+func (c *osCmd) SetDir(path string) {
+	c.cmd.Dir = path
+}
+func (c *osCmd) SetStdin(stdin io.Reader) {
+	c.cmd.Stdin = stdin
+}
+func (c *osCmd) SetStdout(stdout io.Writer) {
+	c.cmd.Stdout = stdout
+}
+func (c *osCmd) SetStderr(stderr io.Writer) {
+	c.cmd.Stderr = stderr
+}
+func (c *osCmd) SetExtraFiles(files []*os.File) {
+	c.cmd.ExtraFiles = files
+}
+func (c *osCmd) SetSysProcAttr(attr *syscall.SysProcAttr) {
+	c.cmd.SysProcAttr = attr
+}
+func (c *osCmd) SetProcess(process *os.Process) {
+	c.cmd.Process = process
+}
+func (c *osCmd) SetProcessState(processState *os.ProcessState) {
+	c.cmd.ProcessState = processState
 }
 
-func (r *shellCmd) CombinedOutput() ([]byte, error) {
-	return r.cmd.CombinedOutput()
-}
+// Gets
 
-func (r *shellCmd) Output() ([]byte, error) {
-	return r.cmd.Output()
+func (c *osCmd) GetPath() string {
+	return c.cmd.Path
 }
-
-func (r *shellCmd) SetWorkingDir(path string) {
-	r.cmd.Dir = path
+func (c *osCmd) GetArgs() []string {
+	return c.cmd.Args
 }
-
-func (r *shellCmd) SetStdin(stdin io.ReadCloser) {
-	r.cmd.Stdin = stdin
+func (c *osCmd) GetEnv() []string {
+	return c.cmd.Env
 }
-
-func (r *shellCmd) SetStdout(stdout io.Writer) {
-	r.cmd.Stdout = stdout
+func (c *osCmd) GetDir() string {
+	return c.cmd.Dir
 }
-
-func (r *shellCmd) StderrPipe() (io.ReadCloser, error) {
-	return r.cmd.StderrPipe()
+func (c *osCmd) GetStdin() io.Reader {
+	return c.cmd.Stdin
 }
-
-func (r *shellCmd) StdoutPipe() (io.ReadCloser, error) {
-	return r.cmd.StdoutPipe()
+func (c *osCmd) GetStdout() io.Writer {
+	return c.cmd.Stdout
 }
-
-func (r *shellCmd) Wait() error {
-	return r.cmd.Wait()
+func (c *osCmd) GetStderr() io.Writer {
+	return c.cmd.Stderr
+}
+func (c *osCmd) GetExtraFiles() []*os.File {
+	return c.cmd.ExtraFiles
+}
+func (c *osCmd) GetSysProcAttr() *syscall.SysProcAttr {
+	return c.cmd.SysProcAttr
+}
+func (c *osCmd) GetProcess() *os.Process {
+	return c.cmd.Process
+}
+func (c *osCmd) GetProcessState() *os.ProcessState {
+	return c.cmd.ProcessState
 }
