@@ -9,16 +9,15 @@ import (
 	"syscall"
 )
 
-// OS is an instance of an OS creator
-var OS Creator = &osCreator{}
-
-// Mock is an instance of a Mock Creator
-var Mock Creator = &mockCreator{}
-
 // Creator is the interface used to create either a mock or real os/exec Cmd
 type Creator interface {
 	Command(name string, arg ...string) Cmder
 	CommandContext(ctx context.Context, name string, arg ...string) Cmder
+}
+
+// MockCreator is the interface used to create a mock os/exec Cmd
+type MockCreator interface {
+	Creator
 }
 
 // Cmder interface wraps the os/exec Cmd struct
@@ -62,6 +61,16 @@ type cmdGetter interface {
 	GetSysProcAttr() *syscall.SysProcAttr
 	GetProcess() *os.Process
 	GetProcessState() *os.ProcessState
+}
+
+// NewOSCreator instantiates a real os/exec factory
+func NewOSCreator() Creator {
+	return &osCreator{}
+}
+
+// NewMockCreator instantiates a mock os/exec factory
+func NewMockCreator(instances []MockInstance) MockCreator {
+	return &mockCreator{instances: instances}
 }
 
 // PipeCommands will pipe two commands together and return the output

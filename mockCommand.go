@@ -8,18 +8,25 @@ import (
 	"syscall"
 )
 
-type mockCreator struct{}
+type mockCreator struct {
+	instances []MockInstance
+}
 
 func (c *mockCreator) Command(name string, arg ...string) Cmder {
-	return &mockCmd{name: name, args: arg}
+	var instance MockInstance
+	if len(c.instances) > 0 {
+		instance = c.instances[0]
+		c.instances = c.instances[1:]
+	}
+	return &mockCmd{name: name, args: arg, mock: instance}
 }
 
 func (c *mockCreator) CommandContext(ctx context.Context, name string, arg ...string) Cmder {
 	return &mockCmd{name: name, args: arg}
 }
 
-type mockCmd struct {
-	Cmder
+// MockInstance defines the returned values of the mock Cmd method calls
+type MockInstance struct {
 	RunErr            error
 	StartErr          error
 	CombinedOutputVal []byte
@@ -34,7 +41,11 @@ type mockCmd struct {
 	StdoutPipeVal     io.ReadCloser
 	StdoutPipeErr     error
 	WaitErr           error
+}
 
+type mockCmd struct {
+	Cmder
+	mock         MockInstance
 	name         string
 	path         string
 	args         []string
@@ -53,28 +64,28 @@ func (c *mockCmd) String() string {
 	return fmt.Sprintf("%s, %v", c.name, c.args)
 }
 func (c *mockCmd) Run() error {
-	return c.RunErr
+	return c.mock.RunErr
 }
 func (c *mockCmd) Start() error {
-	return c.StartErr
+	return c.mock.StartErr
 }
 func (c *mockCmd) CombinedOutput() ([]byte, error) {
-	return c.CombinedOutputVal, c.CombinedOutputErr
+	return c.mock.CombinedOutputVal, c.mock.CombinedOutputErr
 }
 func (c *mockCmd) Output() ([]byte, error) {
-	return c.OutputVal, c.OutputErr
+	return c.mock.OutputVal, c.mock.OutputErr
 }
 func (c *mockCmd) stdinPipe() (io.WriteCloser, error) {
-	return c.stdinPipeVal, c.stdinPipeErr
+	return c.mock.stdinPipeVal, c.mock.stdinPipeErr
 }
 func (c *mockCmd) StderrPipe() (io.ReadCloser, error) {
-	return c.StderrPipeVal, c.StderrPipeErr
+	return c.mock.StderrPipeVal, c.mock.StderrPipeErr
 }
 func (c *mockCmd) StdoutPipe() (io.ReadCloser, error) {
-	return c.StdoutPipeVal, c.StdoutPipeErr
+	return c.mock.StdoutPipeVal, c.mock.StdoutPipeErr
 }
 func (c *mockCmd) Wait() error {
-	return c.WaitErr
+	return c.mock.WaitErr
 }
 
 // Sets
