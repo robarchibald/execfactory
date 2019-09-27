@@ -28,16 +28,18 @@ func (c *osCmd) String() string {
 	return c.cmd.String()
 }
 func (c *osCmd) Run() error {
-	return c.cmd.Run()
+	return convertError(c.cmd.Run())
 }
 func (c *osCmd) Start() error {
-	return c.cmd.Start()
+	return convertError(c.cmd.Start())
 }
 func (c *osCmd) CombinedOutput() ([]byte, error) {
-	return c.cmd.CombinedOutput()
+	out, err := c.cmd.CombinedOutput()
+	return out, convertError(err)
 }
 func (c *osCmd) Output() ([]byte, error) {
-	return c.cmd.Output()
+	out, err := c.cmd.Output()
+	return out, convertError(err)
 }
 func (c *osCmd) StdinPipe() (io.WriteCloser, error) {
 	return c.cmd.StdinPipe()
@@ -49,7 +51,7 @@ func (c *osCmd) StdoutPipe() (io.ReadCloser, error) {
 	return c.cmd.StdoutPipe()
 }
 func (c *osCmd) Wait() error {
-	return c.cmd.Wait()
+	return convertError(c.cmd.Wait())
 }
 
 // Sets
