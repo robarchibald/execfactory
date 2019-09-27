@@ -33,9 +33,8 @@ type MockInstance struct {
 	CombinedOutputErr error
 	OutputVal         []byte
 	OutputErr         error
-	workingdir        string
-	stdinPipeVal      io.WriteCloser
-	stdinPipeErr      error
+	StdinPipeVal      io.WriteCloser
+	StdinPipeErr      error
 	StderrPipeVal     io.ReadCloser
 	StderrPipeErr     error
 	StdoutPipeVal     io.ReadCloser
@@ -82,8 +81,8 @@ func (c *mockCmd) CombinedOutput() ([]byte, error) {
 func (c *mockCmd) Output() ([]byte, error) {
 	return c.mock.OutputVal, c.mock.OutputErr
 }
-func (c *mockCmd) stdinPipe() (io.WriteCloser, error) {
-	return c.mock.stdinPipeVal, c.mock.stdinPipeErr
+func (c *mockCmd) StdinPipe() (io.WriteCloser, error) {
+	return c.mock.StdinPipeVal, c.mock.StdinPipeErr
 }
 func (c *mockCmd) StderrPipe() (io.ReadCloser, error) {
 	return c.mock.StderrPipeVal, c.mock.StderrPipeErr
@@ -97,19 +96,19 @@ func (c *mockCmd) Wait() error {
 
 // Sets
 
-func (c *mockCmd) Setpath(path string) {
+func (c *mockCmd) SetPath(path string) {
 	c.path = path
 }
-func (c *mockCmd) Setargs(args []string) {
+func (c *mockCmd) SetArgs(args []string) {
 	c.args = args
 }
-func (c *mockCmd) Setenv(env []string) {
+func (c *mockCmd) SetEnv(env []string) {
 	c.env = env
 }
-func (c *mockCmd) Setdir(path string) {
+func (c *mockCmd) SetDir(path string) {
 	c.dir = path
 }
-func (c *mockCmd) Setstdin(stdin io.Reader) {
+func (c *mockCmd) SetStdin(stdin io.Reader) {
 	c.stdin = stdin
 }
 func (c *mockCmd) SetStdout(stdout io.Writer) {
@@ -133,19 +132,19 @@ func (c *mockCmd) SetProcessState(processState *os.ProcessState) {
 
 // Gets
 
-func (c *mockCmd) Getpath() string {
+func (c *mockCmd) GetPath() string {
 	return c.path
 }
-func (c *mockCmd) Getargs() []string {
+func (c *mockCmd) GetArgs() []string {
 	return c.args
 }
-func (c *mockCmd) Getenv() []string {
+func (c *mockCmd) GetEnv() []string {
 	return c.env
 }
-func (c *mockCmd) Getdir() string {
+func (c *mockCmd) GetDir() string {
 	return c.dir
 }
-func (c *mockCmd) Getstdin() io.Reader {
+func (c *mockCmd) GetStdin() io.Reader {
 	return c.stdin
 }
 func (c *mockCmd) GetStdout() io.Writer {
