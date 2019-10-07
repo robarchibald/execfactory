@@ -13,16 +13,20 @@ type mockCreator struct {
 }
 
 func (c *mockCreator) Command(name string, arg ...string) Cmder {
+	return c.newMockCmd(name, arg...)
+}
+
+func (c *mockCreator) CommandContext(ctx context.Context, name string, arg ...string) Cmder {
+	return c.newMockCmd(name, arg...)
+}
+
+func (c *mockCreator) newMockCmd(name string, arg ...string) *mockCmd {
 	var instance MockInstance
 	if len(c.instances) > 0 {
 		instance = c.instances[0]
 		c.instances = c.instances[1:]
 	}
-	return &mockCmd{name: name, args: arg, mock: instance}
-}
-
-func (c *mockCreator) CommandContext(ctx context.Context, name string, arg ...string) Cmder {
-	return &mockCmd{name: name, args: arg}
+	return &mockCmd{path: name, args: arg, mock: instance}
 }
 
 // MockInstance defines the returned values of the mock Cmd method calls
@@ -45,7 +49,6 @@ type MockInstance struct {
 type mockCmd struct {
 	Cmder
 	mock          MockInstance
-	name          string
 	path          string
 	args          []string
 	env           []string
@@ -57,40 +60,43 @@ type mockCmd struct {
 	sysProcAttr   *syscall.SysProcAttr
 	process       *os.Process
 	processState  *os.ProcessState
-	methodsCalled []MethodCall
-}
-
-// MethodCall is used to keep track of all the methods called by the mock Cmd
-type MethodCall struct {
-	Name string
-	Args []interface{}
+	methodsCalled []string
 }
 
 func (c *mockCmd) String() string {
-	return fmt.Sprintf("%s, %v", c.name, c.args)
+	c.methodsCalled = append(c.methodsCalled, "String")
+	return fmt.Sprintf("%s, %v", c.path, c.args)
 }
 func (c *mockCmd) Run() error {
+	c.methodsCalled = append(c.methodsCalled, "Run")
 	return c.mock.RunErr
 }
 func (c *mockCmd) Start() error {
+	c.methodsCalled = append(c.methodsCalled, "Start")
 	return c.mock.StartErr
 }
 func (c *mockCmd) CombinedOutput() ([]byte, error) {
+	c.methodsCalled = append(c.methodsCalled, "CombinedOutput")
 	return c.mock.CombinedOutputVal, c.mock.CombinedOutputErr
 }
 func (c *mockCmd) Output() ([]byte, error) {
+	c.methodsCalled = append(c.methodsCalled, "Output")
 	return c.mock.OutputVal, c.mock.OutputErr
 }
 func (c *mockCmd) StdinPipe() (io.WriteCloser, error) {
+	c.methodsCalled = append(c.methodsCalled, "StdinPipe")
 	return c.mock.StdinPipeVal, c.mock.StdinPipeErr
 }
 func (c *mockCmd) StderrPipe() (io.ReadCloser, error) {
+	c.methodsCalled = append(c.methodsCalled, "StderrPipe")
 	return c.mock.StderrPipeVal, c.mock.StderrPipeErr
 }
 func (c *mockCmd) StdoutPipe() (io.ReadCloser, error) {
+	c.methodsCalled = append(c.methodsCalled, "StdoutPipe")
 	return c.mock.StdoutPipeVal, c.mock.StdoutPipeErr
 }
 func (c *mockCmd) Wait() error {
+	c.methodsCalled = append(c.methodsCalled, "Wait")
 	return c.mock.WaitErr
 }
 
@@ -165,6 +171,6 @@ func (c *mockCmd) GetProcess() *os.Process {
 func (c *mockCmd) GetProcessState() *os.ProcessState {
 	return c.processState
 }
-func (c *mockCmd) GetMethodsCalled() []MethodCall {
+func (c *mockCmd) GetMethodsCalled() []string {
 	return c.methodsCalled
 }

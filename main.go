@@ -61,7 +61,7 @@ type cmdGetter interface {
 	GetSysProcAttr() *syscall.SysProcAttr
 	GetProcess() *os.Process
 	GetProcessState() *os.ProcessState
-	GetMethodsCalled() []MethodCall
+	GetMethodsCalled() []string
 }
 
 // NewOSCreator instantiates a real os/exec factory

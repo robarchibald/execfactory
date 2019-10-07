@@ -20,8 +20,7 @@ func (c *osCreator) CommandContext(ctx context.Context, name string, arg ...stri
 }
 
 type osCmd struct {
-	cmd        *exec.Cmd
-	workingDir string
+	cmd *exec.Cmd
 }
 
 func (c *osCmd) String() string {
@@ -125,6 +124,6 @@ func (c *osCmd) GetProcess() *os.Process {
 func (c *osCmd) GetProcessState() *os.ProcessState {
 	return c.cmd.ProcessState
 }
-func (c *osCmd) GetMethodsCalled() []MethodCall {
+func (c *osCmd) GetMethodsCalled() []string {
 	return nil
 }
