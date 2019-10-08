@@ -27,7 +27,7 @@ type Cmder interface {
 	String() string
 	CombinedOutput() ([]byte, error)
 	Output() ([]byte, error)
-	SeparateOutput() ([]byte, []byte, int)
+	SimpleOutput() ([]byte, int)
 	StdinPipe() (io.WriteCloser, error)
 	StderrPipe() (io.ReadCloser, error)
 	StdoutPipe() (io.ReadCloser, error)

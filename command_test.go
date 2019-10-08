@@ -71,9 +71,9 @@ func TestRealOutput(t *testing.T) {
 }
 
 func TestRealSeparateOutput(t *testing.T) {
-	method := "SeparateOutput"
+	method := "SimpleOutput"
 	cmd := &osCmd{newCmd()}
-	if actualOut, actualErr, actualCode := cmd.SeparateOutput(); string(actualOut) != "command.go\n" || len(actualErr) != 0 || actualCode != 0 {
+	if actualOut, actualCode := cmd.SimpleOutput(); string(actualOut) != "command.go\n" || actualCode != 0 {
 		t.Errorf("Expected %s to work with output %s: %v", method, string(actualOut), actualCode)
 	}
 }

@@ -92,12 +92,11 @@ func TestMockOutput(t *testing.T) {
 }
 
 func TestMockSeparateOutput(t *testing.T) {
-	method := "SeparateOutput"
-	err := []byte("separate err")
-	out := []byte("separate out")
-	cmd := &mockCmd{mock: MockInstance{SeparateOutputErr: err, SeparateOutputOut: out, SeparateOutputExitCode: 2}}
-	if actualOut, actualErr, actualCode := cmd.SeparateOutput(); !reflect.DeepEqual(actualOut, out) || !reflect.DeepEqual(actualErr, err) || actualCode != 2 {
-		t.Errorf("Expected %s to work: %v", method, err)
+	method := "SimpleOutput"
+	out := []byte("simle out")
+	cmd := &mockCmd{mock: MockInstance{SimpleOutputOut: out, SimpleOutputExitCode: 2}}
+	if actualOut, actualCode := cmd.SimpleOutput(); !reflect.DeepEqual(actualOut, out) || actualCode != 2 {
+		t.Errorf("Expected %s to work: %v", method, actualOut)
 	}
 	if m := cmd.methodsCalled; len(m) != 1 || m[0] != method {
 		t.Error("Expected methodsCalled to have been filled", m)

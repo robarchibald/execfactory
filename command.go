@@ -1,7 +1,6 @@
 package execfactory
 
 import (
-	"bytes"
 	"context"
 	"io"
 	"os"
@@ -39,18 +38,13 @@ func (c *osCmd) CombinedOutput() ([]byte, error) {
 func (c *osCmd) Output() ([]byte, error) {
 	return c.cmd.Output()
 }
-func (c *osCmd) SeparateOutput() ([]byte, []byte, int) {
-	var stdErr bytes.Buffer
-	var stdOut bytes.Buffer
+func (c *osCmd) SimpleOutput() ([]byte, int) {
 	var exitCode int
-	c.cmd.Stderr = &stdErr
-	c.cmd.Stdout = &stdOut
-
-	err := c.cmd.Run()
+	out, err := c.Output()
 	if ee, ok := err.(*osexec.ExitError); ok {
 		exitCode = ee.ExitCode()
 	}
-	return stdOut.Bytes(), stdErr.Bytes(), exitCode
+	return out, exitCode
 }
 func (c *osCmd) StdinPipe() (io.WriteCloser, error) {
 	return c.cmd.StdinPipe()
