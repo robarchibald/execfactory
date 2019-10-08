@@ -40,7 +40,7 @@ func (c *osCmd) Output() ([]byte, error) {
 }
 func (c *osCmd) SimpleOutput() ([]byte, int) {
 	var exitCode int
-	out, err := c.Output()
+	out, err := c.CombinedOutput()
 	if ee, ok := err.(*osexec.ExitError); ok {
 		exitCode = ee.ExitCode()
 	}
