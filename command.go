@@ -1,6 +1,7 @@
 package execfactory
 
 import (
+	"bytes"
 	"context"
 	"io"
 	"os"
@@ -27,18 +28,29 @@ func (c *osCmd) String() string {
 	return c.cmd.String()
 }
 func (c *osCmd) Run() error {
-	return convertError(c.cmd.Run())
+	return c.cmd.Run()
 }
 func (c *osCmd) Start() error {
-	return convertError(c.cmd.Start())
+	return c.cmd.Start()
 }
 func (c *osCmd) CombinedOutput() ([]byte, error) {
-	out, err := c.cmd.CombinedOutput()
-	return out, convertError(err)
+	return c.cmd.CombinedOutput()
 }
 func (c *osCmd) Output() ([]byte, error) {
-	out, err := c.cmd.Output()
-	return out, convertError(err)
+	return c.cmd.Output()
+}
+func (c *osCmd) SeparateOutput() ([]byte, []byte, int) {
+	var stdErr bytes.Buffer
+	var stdOut bytes.Buffer
+	var exitCode int
+	c.cmd.Stderr = &stdErr
+	c.cmd.Stdout = &stdOut
+
+	err := c.cmd.Run()
+	if ee, ok := err.(*osexec.ExitError); ok {
+		exitCode = ee.ExitCode()
+	}
+	return stdOut.Bytes(), stdErr.Bytes(), exitCode
 }
 func (c *osCmd) StdinPipe() (io.WriteCloser, error) {
 	return c.cmd.StdinPipe()
@@ -50,7 +62,7 @@ func (c *osCmd) StdoutPipe() (io.ReadCloser, error) {
 	return c.cmd.StdoutPipe()
 }
 func (c *osCmd) Wait() error {
-	return convertError(c.cmd.Wait())
+	return c.cmd.Wait()
 }
 
 // Sets

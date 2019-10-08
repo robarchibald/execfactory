@@ -31,19 +31,22 @@ func (c *mockCreator) newMockCmd(name string, arg ...string) *mockCmd {
 
 // MockInstance defines the returned values of the mock Cmd method calls
 type MockInstance struct {
-	RunErr            error
-	StartErr          error
-	CombinedOutputVal []byte
-	CombinedOutputErr error
-	OutputVal         []byte
-	OutputErr         error
-	StdinPipeVal      io.WriteCloser
-	StdinPipeErr      error
-	StderrPipeVal     io.ReadCloser
-	StderrPipeErr     error
-	StdoutPipeVal     io.ReadCloser
-	StdoutPipeErr     error
-	WaitErr           error
+	RunErr                 error
+	StartErr               error
+	CombinedOutputVal      []byte
+	CombinedOutputErr      error
+	OutputVal              []byte
+	OutputErr              error
+	SeparateOutputOut      []byte
+	SeparateOutputErr      []byte
+	SeparateOutputExitCode int
+	StdinPipeVal           io.WriteCloser
+	StdinPipeErr           error
+	StderrPipeVal          io.ReadCloser
+	StderrPipeErr          error
+	StdoutPipeVal          io.ReadCloser
+	StdoutPipeErr          error
+	WaitErr                error
 }
 
 type mockCmd struct {
@@ -82,6 +85,10 @@ func (c *mockCmd) CombinedOutput() ([]byte, error) {
 func (c *mockCmd) Output() ([]byte, error) {
 	c.methodsCalled = append(c.methodsCalled, "Output")
 	return c.mock.OutputVal, c.mock.OutputErr
+}
+func (c *mockCmd) SeparateOutput() ([]byte, []byte, int) {
+	c.methodsCalled = append(c.methodsCalled, "SeparateOutput")
+	return c.mock.SeparateOutputOut, c.mock.SeparateOutputErr, c.mock.SeparateOutputExitCode
 }
 func (c *mockCmd) StdinPipe() (io.WriteCloser, error) {
 	c.methodsCalled = append(c.methodsCalled, "StdinPipe")
